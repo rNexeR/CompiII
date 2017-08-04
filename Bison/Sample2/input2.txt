@@ -1,0 +1,4 @@
+print $0
+print $7, DEC
+print $0, BIN
+print $0, HEX
