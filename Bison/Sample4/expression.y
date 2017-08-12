@@ -12,9 +12,11 @@ void yyerror(const char* msg){
     printf("%s:%d %s\n", yy_filename, yylineno, msg);
 }
 #define YYERROR_VERBOSE 1
+#define YYDEBUG 1
 %}
 
 %expect 1
+%glr-parser
 
 %union {
         Statement *statement_t;
@@ -23,18 +25,18 @@ void yyerror(const char* msg){
         string* string_t;
 }
 
-%type<statement_t> stmt assign print statement_list block_statement if_stmt optional_else_stmt
+%type<statement_t> stmt assign print statement_list block_statement if_stmt
 %type<expr_t> expr term factor compare_options conditional_expr
 %type<int_t> print_option
 // %type<string_t>
 
 
 // TOKENS
-%token OP_ADD OP_SUB OP_MULT OP_DIV TK_L_PAR TK_R_PAR 
+%token OP_ADD OP_SUB OP_MULT OP_DIV TK_L_PAR TK_R_PAR
 %token<int_t> TK_NUMBER TK_HEX TK_BIN TK_DEC
-%token TK_EOL TK_EOF TK_ERROR TK_EQUAL TK_RW_PRINT TK_COMMA TK_RW_IF 
+%token TK_EOL TK_EOF TK_ERROR TK_EQUAL TK_RW_PRINT TK_COMMA TK_RW_IF
 %token TK_RW_ELSE TK_R_BRACE TK_L_BRACE TK_COMP_GREATER TK_COMP_GREATER_EQUAL
-%token  TK_COMP_LESS TK_COMP_NEQUAL TK_COMP_LESS_EQUAL TK_COMP_EQUAL 
+%token  TK_COMP_LESS TK_COMP_NEQUAL TK_COMP_LESS_EQUAL TK_COMP_EQUAL
 %token<string_t> TK_VARIABLE
 
 %%
@@ -48,13 +50,6 @@ statement_list  :       statement_list eols stmt   { $$ = $1; ((BlockStatement *
                 |       stmt                       { $$ = new BlockStatement; ((BlockStatement *)$$)->addStatement($1); }
 ;
 
-
-stmt    :       print       { $$ = $1; }
-        |       assign      { $$ = $1; }
-        |       if_stmt     { $$ = $1; }
-;
-
-
 opt_eols        :       eols
                 |
 ;
@@ -64,15 +59,19 @@ eols    :       eols TK_EOL
         |       TK_EOL
 ;
 
-if_stmt :       TK_RW_IF TK_L_PAR conditional_expr TK_R_PAR eols block_statement eols optional_else_stmt  { $$ = new IfStatement($3, $6, $8); }
+stmt    :       print       { $$ = $1; }
+        |       assign      { $$ = $1; }
+        |       if_stmt     { $$ = $1; }
+;
+
+
+if_stmt :       TK_RW_IF TK_L_PAR conditional_expr TK_R_PAR eols block_statement eols TK_RW_ELSE eols block_statement  { $$ = new IfStatement($3, $6, $10); }
+        |       TK_RW_IF TK_L_PAR conditional_expr TK_R_PAR eols block_statement                                              { $$ = new IfStatement($3, $6, NULL); }
 ;
 
 conditional_expr        :       expr compare_options expr       { $$ = $2; ((BinaryExpr*)$$)->expr1 = $1; ((BinaryExpr*)$$)->expr2 = $3; }
 ;
 
-optional_else_stmt      :       TK_RW_ELSE eols block_statement         { $$ = $3; }
-                        |                                               { $$ = NULL; }                                              
-;
 
 block_statement :       stmt                                        { $$ = $1; }
                 |       TK_L_BRACE opt_eols statement_list opt_eols TK_R_BRACE        { $$ = $3; }
@@ -94,7 +93,7 @@ print_option    :       TK_BIN { $$ = BIN; }
                 |       TK_HEX { $$ = HEX; }
                 |       TK_DEC { $$ = DEC; }
 
-assign  :   TK_VARIABLE TK_EQUAL expr { /*arreglo[$1] = $3;*/ $$ = new AssignStatement($3,$1); }
+assign  :   TK_VARIABLE TK_EQUAL expr { /*arreglo[$1] = $3;*/ $$ = new AssignStatement($3,$1); delete $1; }
 ;
 
 expr    :   expr OP_ADD term { $$ = new AddExpr($1,$3); }
@@ -108,6 +107,6 @@ term    :   term OP_MULT factor { $$ = new MulExpr($1, $3); }
 ;
 
 factor  :   TK_NUMBER { $$ = new NumberExpr($1); }
-        |   TK_VARIABLE { $$ = new VarExpr($1); }
-        |   TK_L_PAR expr TK_R_PAR { $$ = $2; } 
+        |   TK_VARIABLE { $$ = new VarExpr($1); delete $1; }
+        |   TK_L_PAR expr TK_R_PAR { $$ = $2; }
 ;

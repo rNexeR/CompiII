@@ -1,8 +1,10 @@
 %option noyywrap
 %option yylineno
 %x comment
+%x comment_in_eol
 %x include
 %x include2
+%x end_lines
 %{
     #include <stdio.h>
     #include "token.h"
@@ -33,7 +35,7 @@
 "-"                             { return OP_SUB; }
 "*"                             { return OP_MULT; }
 "/*"                            { BEGIN(comment); }
-"//".*\n                        { return TK_EOL; }
+"//".*\n                        { BEGIN(end_lines); }
 "//".*                          { /*Nothing*/ }
 "/"                             { return OP_DIV; }
 "("                             { return TK_L_PAR; }
@@ -45,8 +47,6 @@
 [0-9]+                          { yylval.int_t = atoi(yytext); return TK_NUMBER; }
 "print"                         { return TK_RW_PRINT; }
 "if"                            { return TK_RW_IF; }
-"else"                          { return TK_RW_ELSE; }
-_?[a-zA-Z]+([a-zA-Z]|[0-9]|_)*    { string *t = new string(yytext); yylval.string_t = t; return TK_VARIABLE; }
 "="                             { return TK_EQUAL; }
 "=="                            { return TK_COMP_EQUAL; }
 "!="                            { return TK_COMP_NEQUAL; }
@@ -56,8 +56,9 @@ _?[a-zA-Z]+([a-zA-Z]|[0-9]|_)*    { string *t = new string(yytext); yylval.strin
 "<="                            { return TK_COMP_LESS_EQUAL; }
 "{"                             { return TK_L_BRACE; }
 "}"                             { return TK_R_BRACE; }
-^"#"[ \t]*"include"             { BEGIN(include); } 
-"\n"                            { return TK_EOL; }
+^"#"[ \t]*"include"             { BEGIN(include); }
+[_a-zA-Z][a-zA-Z0-9_]*          { string *t = new string(yytext); yylval.string_t = t; return TK_VARIABLE; }
+"\n"                            { BEGIN(end_lines); }
 <INITIAL><<EOF>>                { if(pop_file() != 0) yyterminate(); return TK_EOL; }
 .                               { return TK_ERROR; }
 
@@ -65,24 +66,35 @@ _?[a-zA-Z]+([a-zA-Z]|[0-9]|_)*    { string *t = new string(yytext); yylval.strin
 <comment>.|\n                   { /* Nothing */ }
 <comment><<EOF>>                { printf("Line %d: Block comment without end\n", yylineno); return 0; }
 
+<comment_in_eol>"*/"                   { BEGIN(end_lines); }
+<comment_in_eol>.|\n                   { /* Nothing */ }
+<comment_in_eol><<EOF>>                { printf("Line %d: Block comment without end\n", yylineno); return 0; }
+
+<end_lines>\n                   { }
+<end_lines>"//".*\n             { }
+<end_lines>"/*"                 { BEGIN(comment_in_eol); }
+<end_lines>[ \t]                { }
+<end_lines>^"#"[ \t]*"include"  { BEGIN(include); return TK_EOL;}
+<end_lines>"else"               { BEGIN(INITIAL); return TK_RW_ELSE; }
+<end_lines><<EOF>>              { BEGIN(INITIAL); return TK_EOL; }
+<end_lines>.                    { BEGIN(INITIAL); unput(yytext[0]); return TK_EOL; }
+
 <include>[ \t]*                 { /* Nothing */ }
-<include>\".*\"\n               { 
+<include>\".*\"\n               {
     yytext++;
-    yytext[strlen(yytext)-2] = '\0'; 
+    yytext[strlen(yytext)-2] = '\0';
 
     if(push_file(yytext) != 0)
         yyterminate();
     BEGIN(INITIAL);
-    return TK_EOL; 
     }
-<include>"<".*">"*\n            { 
+<include>"<".*">"*\n            {
     yytext++;
-    yytext[strlen(yytext)-2] = '\0'; 
+    yytext[strlen(yytext)-2] = '\0';
 
     if(push_file(yytext) != 0)
         yyterminate();
     BEGIN(INITIAL);
-    return TK_EOL;
     }
 
 %%
@@ -109,7 +121,7 @@ int push_file(char* filename){
     is->filename = yy_filename;
 
     inc_stat = is;
-    
+
     yylineno = 1;
     yy_filename = filename;
 
@@ -125,7 +137,7 @@ int pop_file(){
 
     yylineno = inc_stat->lineno;
     yy_filename = inc_stat->filename;
-    
+
     free(inc_stat);
 
     if(prev == NULL) return 1;

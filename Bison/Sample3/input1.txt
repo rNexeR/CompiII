@@ -1,0 +1,32 @@
+/*
+ * Comentario 1
+*/
+//print 128, BIN
+
+num = 1050
+print num, DEC
+//Comentario 1
+otro = 32
+print otro, HEX
+//#include "input2.txt"
+
+if( num == 1000)
+{
+    num = 900
+    print num, DEC
+}
+//ella = 5
+/*
+El val: 
+*/
+else
+    if(num < 900)
+        if(num == 101)
+            num = 240
+        else
+            otro = 1
+//print ella, DEC
+print num, DEC
+print (otro), DEC
+//print 150, DEC
+// Comentario 2

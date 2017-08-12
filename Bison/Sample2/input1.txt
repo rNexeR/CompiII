@@ -1,8 +1,8 @@
 //comentario
-$0 = 10
-$7 = 20 //otro comentario
+zero0_0 = 10
+siete = 20 //otro comentario
 //hola
-$1 = ($0 + $7) * 5
+uno = (zero0_0 + siete) * 5
 
 /*
 
@@ -13,12 +13,16 @@ hola
 
 print 5+5
 
-if($0 == 10)
-    $1 = ($0 + $7)*5
+if(zero0_0 == 10)
+{
+    uno = (zero0_0 + siete)*5
+}
 else
-    $1 = 20
+{
+    uno = 20
+}
 
-print $1
-print ($1 + 10)
+print uno
+print (uno + 10)
 print 5
 //hola
