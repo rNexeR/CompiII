@@ -67,17 +67,32 @@
 <comment><<EOF>>                { printf("Line %d: Block comment without end\n", yylineno); return 0; }
 
 <include>[ \t]*                 { /* Nothing */ }
-<include>\".*\"\n               {
+<include>\".*\"               {
     yytext++;
-    yytext[strlen(yytext)-2] = '\0';
+    yytext[strlen(yytext)-1] = '\0';
+
+    int c;
+    while ((c = yyinput()) == ' ' || c == '\t');
+    if(c != '\n'){
+        printf("Line %d: Bad include expression line\n", yylineno);
+        return 0;
+    }
+    yylineno++;
 
     if(push_file(yytext) != 0)
         yyterminate();
     BEGIN(INITIAL);
     }
-<include>"<".*">"*\n            {
+<include>"<".*">"            {
     yytext++;
-    yytext[strlen(yytext)-2] = '\0';
+    yytext[strlen(yytext)-1] = '\0';
+
+    int c;
+    while ((c = yyinput()) == ' ' || c == '\t');
+    if(c != '\n'){
+        printf("Line %d: Bad include expression line\n", yylineno);
+        return 0;
+    }
 
     if(push_file(yytext) != 0)
         yyterminate();
