@@ -6,10 +6,10 @@ extern FILE *yyin;
 int push_file(char *);
 
 void *NxParserAlloc(void *(*allocProc)(size_t));
-void *NxParser(void *, int, Token_t *);
+void *NxParser(void *, int, Token *);
 void *NxParserFree(void *, void (*freeProc)(void *));
 int yylex();
-extern Token_t *current_token;
+extern Token *current_token;
 
 int main(int argc, char *argv[])
 {
@@ -42,9 +42,9 @@ int main(int argc, char *argv[])
         }
         token = yylex();
     }
-    printf("Fin\n");
+    // printf("Fin\n");
     NxParser(parser, 0, 0);
-    printf("/Fin\n");
+    // printf("/Fin\n");
 
     NxParserFree(parser, free);
 }

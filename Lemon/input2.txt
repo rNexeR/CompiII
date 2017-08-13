@@ -1,2 +1,4 @@
+print 5
 print 101010, DEC
 print 10
+print 10101010

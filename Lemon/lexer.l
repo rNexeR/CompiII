@@ -6,6 +6,7 @@
 %x include2
 %{
     #include <stdio.h>
+    #include <string.h>
     #include "ast.h"
     #include "tokens.h"
     // #include "lexglobal.h"
@@ -28,7 +29,7 @@
     char* yy_filename;
     int push_file(char*);
     int pop_file();
-    Token_t *current_token = (Token_t *)(malloc(sizeof(Token_t)));
+    Token *current_token;
 %}
 
 %%
@@ -46,9 +47,10 @@
 "DEC"                           { return TK_DEC; }
 "HEX"                           { return TK_HEX; }
 "BIN"                           { return TK_BIN; }
-[0-9]+                          { current_token->int_value = atoi(yytext); return TK_NUMBER; }
+[0-9]+                          { current_token = new Token(NULL, atoi(yytext)); return TK_NUMBER; }
 "print"                         { return TK_RW_PRINT; }
 "if"                            { return TK_RW_IF; }
+"while"                         { return TK_RW_WHILE; }
 "="                             { return TK_EQUAL; }
 "=="                            { return TK_COMP_EQUAL; }
 "!="                            { return TK_COMP_NEQUAL; }
@@ -60,7 +62,7 @@
 "}"                             { return TK_R_BRACE; }
 "else"                          { return TK_RW_ELSE; }
 ^"#"[ \t]*"include"             { BEGIN(include); }
-[_a-zA-Z][a-zA-Z0-9_]*          { current_token->str_value = new string(yytext); return TK_VARIABLE; }
+[_a-zA-Z][a-zA-Z0-9_]*          { current_token = new Token(new string(yytext), -1); return TK_VARIABLE; }
 "\n"                            { return TK_EOL; }
 <INITIAL><<EOF>>                { if(pop_file() != 0) yyterminate(); return TK_EOL; }
 .                               { printf("Line %d: Invalid Token\n", yylineno); }
@@ -152,3 +154,4 @@ int pop_file(){
 
     return 0;
 }
+

@@ -1,4 +1,4 @@
-%token_type { Token_t * }
+%token_type { Token * }
 
 %include{
     #include "ast.h"
@@ -17,6 +17,7 @@
 %type block_statement { Statement * } 
 %type if_stmt { Statement * }
 %type opt_else { Statement * }
+%type while_stmt { Statement * }
 
 %type expr { Expr * } 
 %type term { Expr * } 
@@ -32,7 +33,7 @@
 
 %start_symbol input
 
-input ::= opt_eol statement_list(S) opt_eol .     { printf("-->\n"); S->exec(); }
+input ::= opt_eol statement_list(S) opt_eol .     { S->exec(); }
 
 opt_eol ::= TK_EOL .
 opt_eol ::= .
@@ -40,14 +41,17 @@ opt_eol ::= .
 statement_list(L) ::= statement_list(Ss) TK_EOL stmt(S) .     { L = Ss; ((BlockStatement *)L)->addStatement(S); }
 statement_list(L) ::= stmt(S) .                             { L = new BlockStatement; ((BlockStatement *)L)->addStatement(S); }
 
-stmt(L) ::= print(S) .     { L = S; }
-stmt(L) ::= assign(S) .    { L = S; }
-stmt(L) ::= if_stmt(S) .   { L = S; }
+stmt(L) ::= print(S) .      { L = S; }
+stmt(L) ::= assign(S) .     { L = S; }
+stmt(L) ::= if_stmt(S) .    { L = S; }
+stmt(L) ::= while_stmt(W) . { L = W; }
 
 if_stmt(L) ::= TK_RW_IF TK_L_PAR conditional_expr(E) TK_R_PAR TK_EOL block_statement(S) opt_else(OE) .  { L = new IfStatement(E, S, OE); }
 
 opt_else(L) ::= TK_RW_ELSE TK_EOL block_statement(OS) .     { L = OS; }
 opt_else(L) ::= .                                           { L = NULL; }
+
+while_stmt(W) ::= TK_RW_WHILE TK_L_PAR conditional_expr(E) TK_R_PAR TK_EOL block_statement(S) .     { W = new WhileStatement(E, S); }
 
 conditional_expr(L) ::= expr(E1) compare_options(O) expr(E2) .  { L = O; ((BinaryExpr*)L)->expr1 = E1; ((BinaryExpr*)L)->expr2 = E2; }
 
@@ -65,9 +69,9 @@ compare_options(L) ::= TK_COMP_LESS_EQUAL .     { L = new LessOrEqualThanRelatio
 print(L) ::= TK_RW_PRINT expr(E) . { L = new PrintStatement(E, DEC); }
 print(L) ::= TK_RW_PRINT expr(E) TK_COMMA print_option(O) . { L = new PrintStatement(E, O); }
 
-print_option(L) ::= TK_BIN(O) . { L = O->int_value; }
-print_option(L) ::= TK_HEX(O) . { L = O->int_value; }
-print_option(L) ::= TK_DEC(O) . { L = O->int_value; }
+print_option(L) ::= TK_BIN . { L = BIN; }
+print_option(L) ::= TK_HEX . { L = HEX; }
+print_option(L) ::= TK_DEC . { L = DEC; }
 
 assign(L) ::= TK_VARIABLE(V) TK_EQUAL expr(E) . { L = new AssignStatement(E,V->str_value); /*delete V->str_value;*/ }
 
@@ -81,4 +85,4 @@ term(L) ::=   factor(F) .                   { L = F; }
 
 factor(L) ::= TK_NUMBER(F) .                { L = new NumberExpr(F->int_value); }
 factor(L) ::= TK_VARIABLE(F) .              { L = new VarExpr(F->str_value); /*delete F->str_value;*/ }
-factor(L) ::= TK_L_PAR expr(E) TK_R_PAR .   { L = E; }
+factor(L) ::= TK_L_PAR expr(E) TK_R_PAR .    { L = E; }

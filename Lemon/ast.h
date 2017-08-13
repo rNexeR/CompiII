@@ -19,10 +19,20 @@ using namespace std;
 //   int value;
 // } variable_info_t;
 
-typedef struct Token{
+class Token
+{
+  public:
+  Token(){
+    this->str_value = new string();
+  }
+  Token(string *str, int ent){
+    this->str_value = str;
+    this->int_value = ent;
+  }
   string *str_value;
   int int_value;
-} Token_t;
+
+};
 
 class Expr
 {
@@ -74,7 +84,7 @@ public:
 class EqualRelationalExpr : public BinaryExpr
 {
 public:
-  EqualRelationalExpr() : BinaryExpr(NULL, NULL) { }
+  EqualRelationalExpr() : BinaryExpr(NULL, NULL) {}
   EqualRelationalExpr(Expr *epxr1, Expr *expr2) : BinaryExpr(expr1, expr2) {}
 
   int eval();
@@ -83,7 +93,7 @@ public:
 class NotEqualRelationalExpr : public BinaryExpr
 {
 public:
-  NotEqualRelationalExpr() : BinaryExpr(NULL, NULL) { }
+  NotEqualRelationalExpr() : BinaryExpr(NULL, NULL) {}
   NotEqualRelationalExpr(Expr *epxr1, Expr *expr2) : BinaryExpr(expr1, expr2) {}
 
   int eval();
@@ -92,7 +102,7 @@ public:
 class GreaterThanRelationalExpr : public BinaryExpr
 {
 public:
-  GreaterThanRelationalExpr() : BinaryExpr(NULL, NULL) { }
+  GreaterThanRelationalExpr() : BinaryExpr(NULL, NULL) {}
   GreaterThanRelationalExpr(Expr *epxr1, Expr *expr2) : BinaryExpr(expr1, expr2) {}
 
   int eval();
@@ -101,7 +111,7 @@ public:
 class GreaterOrEqualThanRelationalExpr : public BinaryExpr
 {
 public:
-  GreaterOrEqualThanRelationalExpr() : BinaryExpr(NULL, NULL) { }
+  GreaterOrEqualThanRelationalExpr() : BinaryExpr(NULL, NULL) {}
   GreaterOrEqualThanRelationalExpr(Expr *epxr1, Expr *expr2) : BinaryExpr(expr1, expr2) {}
 
   int eval();
@@ -110,7 +120,7 @@ public:
 class LessThanRelationalExpr : public BinaryExpr
 {
 public:
-  LessThanRelationalExpr() : BinaryExpr(NULL, NULL) { }
+  LessThanRelationalExpr() : BinaryExpr(NULL, NULL) {}
   LessThanRelationalExpr(Expr *epxr1, Expr *expr2) : BinaryExpr(expr1, expr2) {}
 
   int eval();
@@ -119,7 +129,7 @@ public:
 class LessOrEqualThanRelationalExpr : public BinaryExpr
 {
 public:
-  LessOrEqualThanRelationalExpr() : BinaryExpr(NULL, NULL) { }
+  LessOrEqualThanRelationalExpr() : BinaryExpr(NULL, NULL) {}
   LessOrEqualThanRelationalExpr(Expr *epxr1, Expr *expr2) : BinaryExpr(expr1, expr2) {}
 
   int eval();
@@ -139,11 +149,11 @@ public:
 class VarExpr : public Expr
 {
 public:
-  VarExpr(string* identifier)
+  VarExpr(string *identifier)
   {
     this->identifier = *identifier;
-    cout<<"VarExpr: "<<this->identifier<<endl;
-    printf("%\np", identifier);
+    // cout << "VarExpr: " << this->identifier << endl;
+    // printf("%\np", identifier);
   }
   int eval();
   string identifier;
@@ -175,12 +185,12 @@ class AssignStatement : public Statement
 {
 public:
   AssignStatement() : Statement() {}
-  AssignStatement(Expr *expr, string* identifier) : Statement()
+  AssignStatement(Expr *expr, string *identifier) : Statement()
   {
     this->expr = expr;
     this->identifier = *identifier;
-    cout<<"Assign: "<<this->identifier<<endl;
-    printf("%p\n", identifier);
+    // cout << "Assign: " << this->identifier << endl;
+    // printf("%p\n", identifier);
   }
 
   void exec();
@@ -211,6 +221,7 @@ protected:
   {
     this->expr = expr;
   }
+
 public:
   Expr *expr;
 };
@@ -228,6 +239,21 @@ public:
 
   Statement *body;
   Statement *else_body;
+};
+
+class WhileStatement : public Statement
+{
+public:
+  WhileStatement(Expr *expr, Statement *body) : Statement()
+  {
+    this->expr = expr;
+    this->body = body;
+  }
+
+  void exec();
+
+  Expr* expr;
+  Statement *body;
 };
 
 #endif

@@ -27,7 +27,7 @@ int DivExpr::eval()
 int VarExpr::eval()
 {
     // printf("Var {%s} = %d\n", this->identifier.c_str(), variables[this->identifier]);
-    cout<<"Var Eval ("<<this->identifier<<")= "<<variables[this->identifier]<<endl;
+    // cout << "Var Eval (" << this->identifier << ")= " << variables[this->identifier] << endl;
     return variables[identifier];
 }
 
@@ -110,5 +110,13 @@ void IfStatement::exec()
     else if (else_body != NULL)
     {
         else_body->exec();
+    }
+}
+
+void WhileStatement::exec()
+{
+    while (expr->eval())
+    {
+        body->exec();
     }
 }

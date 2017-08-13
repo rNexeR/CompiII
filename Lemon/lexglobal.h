@@ -2,7 +2,7 @@
 
 #ifndef YYSTYPE
 typedef union {
-    Token_t *t;
+    char *lex;
 } yystype;
 #define YYSTYPE yystype
 #define YYSTYPE_IS_TRIVIAL 1
