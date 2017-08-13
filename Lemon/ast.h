@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <string.h>
 #include <map>
 
 using namespace std;
@@ -17,6 +18,11 @@ using namespace std;
 //   string identifier;
 //   int value;
 // } variable_info_t;
+
+typedef struct Token{
+  string *str_value;
+  int int_value;
+} Token_t;
 
 class Expr
 {
@@ -135,8 +141,9 @@ class VarExpr : public Expr
 public:
   VarExpr(string* identifier)
   {
-    cout<<"Var expr: "<<*identifier<<endl;
     this->identifier = *identifier;
+    cout<<"VarExpr: "<<this->identifier<<endl;
+    printf("%\np", identifier);
   }
   int eval();
   string identifier;
@@ -172,7 +179,8 @@ public:
   {
     this->expr = expr;
     this->identifier = *identifier;
-    cout<<"New var: "<<*identifier<<endl;
+    cout<<"Assign: "<<this->identifier<<endl;
+    printf("%p\n", identifier);
   }
 
   void exec();
