@@ -941,7 +941,7 @@ static void yy_reduce(
         break;
       case 27: /* assign ::= TK_VARIABLE TK_EQUAL expr */
 #line 76 "grammar.y"
-{ yylhsminor.yy4 = new AssignStatement(yymsp[0].minor.yy6,yymsp[-2].minor.yy0->str_value); /*delete yymsp[-2].minor.yy0->str_value;*/ }
+{ yylhsminor.yy4 = new AssignStatement(yymsp[0].minor.yy6,yymsp[-2].minor.yy0->str_value); delete yymsp[-2].minor.yy0->str_value; }
 #line 946 "expression_parser.cpp"
   yymsp[-2].minor.yy4 = yylhsminor.yy4;
         break;
@@ -984,7 +984,7 @@ static void yy_reduce(
         break;
       case 35: /* factor ::= TK_VARIABLE */
 #line 87 "grammar.y"
-{ yylhsminor.yy6 = new VarExpr(yymsp[0].minor.yy0->str_value); /*delete yymsp[0].minor.yy0->str_value;*/ }
+{ yylhsminor.yy6 = new VarExpr(yymsp[0].minor.yy0->str_value); delete yymsp[0].minor.yy0->str_value; }
 #line 989 "expression_parser.cpp"
   yymsp[0].minor.yy6 = yylhsminor.yy6;
         break;

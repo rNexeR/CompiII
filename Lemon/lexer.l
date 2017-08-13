@@ -44,9 +44,9 @@
 "("                             { return TK_L_PAR; }
 ")"                             { return TK_R_PAR; }
 ","                             { return TK_COMMA; }
-"DEC"                           { return TK_DEC; }
-"HEX"                           { return TK_HEX; }
-"BIN"                           { return TK_BIN; }
+"DEC"|"dec"                     { return TK_DEC; }
+"HEX"|"hex"                     { return TK_HEX; }
+"BIN"|"bin"                     { return TK_BIN; }
 [0-9]+                          { current_token = new Token(NULL, atoi(yytext)); return TK_NUMBER; }
 "print"                         { return TK_RW_PRINT; }
 "if"                            { return TK_RW_IF; }

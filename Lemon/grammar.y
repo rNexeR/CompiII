@@ -73,7 +73,7 @@ print_option(L) ::= TK_BIN . { L = BIN; }
 print_option(L) ::= TK_HEX . { L = HEX; }
 print_option(L) ::= TK_DEC . { L = DEC; }
 
-assign(L) ::= TK_VARIABLE(V) TK_EQUAL expr(E) . { L = new AssignStatement(E,V->str_value); /*delete V->str_value;*/ }
+assign(L) ::= TK_VARIABLE(V) TK_EQUAL expr(E) . { L = new AssignStatement(E,V->str_value); delete V->str_value; }
 
 expr(L) ::= expr(E) OP_ADD term(T) .    { L = new AddExpr(E,T); }
 expr(L) ::= expr(E) OP_SUB term(T) .    { L = new SubExpr(E,T); }
@@ -84,5 +84,5 @@ term(L) ::=   term(T) OP_DIV factor(F) .    { L = new DivExpr(T, F); }
 term(L) ::=   factor(F) .                   { L = F; }
 
 factor(L) ::= TK_NUMBER(F) .                { L = new NumberExpr(F->int_value); }
-factor(L) ::= TK_VARIABLE(F) .              { L = new VarExpr(F->str_value); /*delete F->str_value;*/ }
+factor(L) ::= TK_VARIABLE(F) .              { L = new VarExpr(F->str_value); delete F->str_value; }
 factor(L) ::= TK_L_PAR expr(E) TK_R_PAR .    { L = E; }
