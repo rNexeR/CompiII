@@ -47,6 +47,9 @@
 "DEC"|"dec"                     { return TK_DEC; }
 "HEX"|"hex"                     { return TK_HEX; }
 "BIN"|"bin"                     { return TK_BIN; }
+"fn_def"                        { return RW_FN_DEF; }
+"return"                        { return RW_RETURN; }
+"call"                          { return RW_CALL; }
 [0-9]+                          { current_token = new Token(NULL, atoi(yytext)); return TK_NUMBER; }
 "print"                         { return TK_RW_PRINT; }
 "if"                            { return TK_RW_IF; }
@@ -62,7 +65,7 @@
 "}"                             { return TK_R_BRACE; }
 "else"                          { return TK_RW_ELSE; }
 ^"#"[ \t]*"include"             { BEGIN(include); }
-[_a-zA-Z][a-zA-Z0-9_]*          { current_token = new Token(new string(yytext), -1); return TK_VARIABLE; }
+[_a-zA-Z][a-zA-Z0-9_]*          { current_token = new Token(new string(yytext), -1); return TK_ID; }
 "\n"                            { return TK_EOL; }
 <INITIAL><<EOF>>                { if(pop_file() != 0) yyterminate(); return TK_EOL; }
 .                               { printf("Line %d: Invalid Token\n", yylineno); }

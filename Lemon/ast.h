@@ -21,17 +21,18 @@ using namespace std;
 
 class Token
 {
-  public:
-  Token(){
+public:
+  Token()
+  {
     this->str_value = new string();
   }
-  Token(string *str, int ent){
+  Token(string *str, int ent)
+  {
     this->str_value = str;
     this->int_value = ent;
   }
   string *str_value;
   int int_value;
-
 };
 
 class Expr
@@ -252,8 +253,49 @@ public:
 
   void exec();
 
-  Expr* expr;
+  Expr *expr;
   Statement *body;
+};
+
+class FunctionDefinitionStatement : public Statement
+{
+public:
+  FunctionDefinitionStatement(string *name, list<string> *parameters, Statement *body) : Statement()
+  {
+    this->name = *name;
+    this->parameters = parameters;
+    this->body = body;
+  }
+  void exec();
+  string name;
+  list<string> *parameters;
+  Statement *body;
+};
+
+class ReturnStatement : public Statement
+{
+public:
+  ReturnStatement(Expr *expr) : Statement()
+  {
+    this->expr = expr;
+  }
+
+  Expr *expr;
+  void exec();
+};
+
+class FunctionCallStatement : public Statement
+{
+public:
+  FunctionCallStatement(string *name, list<Expr *> *args) : Statement()
+  {
+    this->name = *name;
+    this->args = args;
+  }
+
+  string name;
+  list<Expr *> *args;
+  void exec();
 };
 
 #endif

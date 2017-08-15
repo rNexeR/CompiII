@@ -2,6 +2,7 @@
 
 int vars[8];
 map<string, int> variables;
+map<string, FunctionDefinitionStatement*> funs;
 
 //Expressions
 int AddExpr::eval()
@@ -119,4 +120,34 @@ void WhileStatement::exec()
     {
         body->exec();
     }
+}
+
+void FunctionDefinitionStatement::exec()
+{
+    printf("Function definition: %s( ", this->name.c_str());
+    for(auto i = this->parameters->begin(); i != this->parameters->end(); i++)
+        printf("%s, ", (*i).c_str());
+    printf(" )\n");
+
+    funs[this->name] = this;
+
+    // body->exec();
+    // cout<<"Function definition: "<<this->name<<endl;
+}
+
+void ReturnStatement::exec()
+{
+    printf("Return: %d\n", this->expr->eval());
+    // cout<<"Function definition: "<<this->name<<endl;
+}
+
+void FunctionCallStatement::exec()
+{
+    printf("Function call: %s( ", this->name.c_str());
+    for(auto i = this->args->begin(); i != this->args->end(); i++)
+        printf("%d, ", (*i)->eval());
+    printf(" )\n");
+
+    auto fn = funs[this->name];
+    fn->body->exec();
 }
