@@ -1,0 +1,295 @@
+Terminals unused in grammar
+
+   TK_ERR
+
+
+Grammar
+
+    0 $accept: start $end
+
+    1 start: expr_list
+
+    2 expr_list: expr_list TK_EOL expr
+    3          | expr
+
+    4 expr: term
+    5     | expr '+' term
+    6     | expr '-' term
+
+    7 term: factor
+    8     | term '*' factor
+
+    9 factor: '(' expr ')'
+   10       | TK_NUM
+   11       | TK_ID
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+'(' (40) 9
+')' (41) 9
+'*' (42) 8
+'+' (43) 5
+'-' (45) 6
+error (256)
+TK_NUM (258) 10
+TK_ID (259) 11
+TK_ERR (260)
+TK_EOL (261) 2
+
+
+Nonterminals, with rules where they appear
+
+$accept (12)
+    on left: 0
+start (13)
+    on left: 1, on right: 0
+expr_list (14)
+    on left: 2 3, on right: 1 2
+expr (15)
+    on left: 4 5 6, on right: 2 3 5 6 9
+term (16)
+    on left: 7 8, on right: 4 5 6 8
+factor (17)
+    on left: 9 10 11, on right: 7 8
+
+
+State 0
+
+    0 $accept: . start $end
+    1 start: . expr_list
+    2 expr_list: . expr_list TK_EOL expr
+    3          | . expr
+    4 expr: . term
+    5     | . expr '+' term
+    6     | . expr '-' term
+    7 term: . factor
+    8     | . term '*' factor
+    9 factor: . '(' expr ')'
+   10       | . TK_NUM
+   11       | . TK_ID
+
+    TK_NUM  shift, and go to state 1
+    TK_ID   shift, and go to state 2
+    '('     shift, and go to state 3
+
+    start      go to state 4
+    expr_list  go to state 5
+    expr       go to state 6
+    term       go to state 7
+    factor     go to state 8
+
+
+State 1
+
+   10 factor: TK_NUM .
+
+    $default  reduce using rule 10 (factor)
+
+
+State 2
+
+   11 factor: TK_ID .
+
+    $default  reduce using rule 11 (factor)
+
+
+State 3
+
+    4 expr: . term
+    5     | . expr '+' term
+    6     | . expr '-' term
+    7 term: . factor
+    8     | . term '*' factor
+    9 factor: . '(' expr ')'
+    9       | '(' . expr ')'
+   10       | . TK_NUM
+   11       | . TK_ID
+
+    TK_NUM  shift, and go to state 1
+    TK_ID   shift, and go to state 2
+    '('     shift, and go to state 3
+
+    expr    go to state 9
+    term    go to state 7
+    factor  go to state 8
+
+
+State 4
+
+    0 $accept: start . $end
+
+    $end  shift, and go to state 10
+
+
+State 5
+
+    1 start: expr_list .  [$end]
+    2 expr_list: expr_list . TK_EOL expr
+
+    TK_EOL  shift, and go to state 11
+
+    $default  reduce using rule 1 (start)
+
+
+State 6
+
+    3 expr_list: expr .  [$end, TK_EOL]
+    5 expr: expr . '+' term
+    6     | expr . '-' term
+
+    '+'  shift, and go to state 12
+    '-'  shift, and go to state 13
+
+    $default  reduce using rule 3 (expr_list)
+
+
+State 7
+
+    4 expr: term .  [$end, TK_EOL, '+', '-', ')']
+    8 term: term . '*' factor
+
+    '*'  shift, and go to state 14
+
+    $default  reduce using rule 4 (expr)
+
+
+State 8
+
+    7 term: factor .
+
+    $default  reduce using rule 7 (term)
+
+
+State 9
+
+    5 expr: expr . '+' term
+    6     | expr . '-' term
+    9 factor: '(' expr . ')'
+
+    '+'  shift, and go to state 12
+    '-'  shift, and go to state 13
+    ')'  shift, and go to state 15
+
+
+State 10
+
+    0 $accept: start $end .
+
+    $default  accept
+
+
+State 11
+
+    2 expr_list: expr_list TK_EOL . expr
+    4 expr: . term
+    5     | . expr '+' term
+    6     | . expr '-' term
+    7 term: . factor
+    8     | . term '*' factor
+    9 factor: . '(' expr ')'
+   10       | . TK_NUM
+   11       | . TK_ID
+
+    TK_NUM  shift, and go to state 1
+    TK_ID   shift, and go to state 2
+    '('     shift, and go to state 3
+
+    expr    go to state 16
+    term    go to state 7
+    factor  go to state 8
+
+
+State 12
+
+    5 expr: expr '+' . term
+    7 term: . factor
+    8     | . term '*' factor
+    9 factor: . '(' expr ')'
+   10       | . TK_NUM
+   11       | . TK_ID
+
+    TK_NUM  shift, and go to state 1
+    TK_ID   shift, and go to state 2
+    '('     shift, and go to state 3
+
+    term    go to state 17
+    factor  go to state 8
+
+
+State 13
+
+    6 expr: expr '-' . term
+    7 term: . factor
+    8     | . term '*' factor
+    9 factor: . '(' expr ')'
+   10       | . TK_NUM
+   11       | . TK_ID
+
+    TK_NUM  shift, and go to state 1
+    TK_ID   shift, and go to state 2
+    '('     shift, and go to state 3
+
+    term    go to state 18
+    factor  go to state 8
+
+
+State 14
+
+    8 term: term '*' . factor
+    9 factor: . '(' expr ')'
+   10       | . TK_NUM
+   11       | . TK_ID
+
+    TK_NUM  shift, and go to state 1
+    TK_ID   shift, and go to state 2
+    '('     shift, and go to state 3
+
+    factor  go to state 19
+
+
+State 15
+
+    9 factor: '(' expr ')' .
+
+    $default  reduce using rule 9 (factor)
+
+
+State 16
+
+    2 expr_list: expr_list TK_EOL expr .  [$end, TK_EOL]
+    5 expr: expr . '+' term
+    6     | expr . '-' term
+
+    '+'  shift, and go to state 12
+    '-'  shift, and go to state 13
+
+    $default  reduce using rule 2 (expr_list)
+
+
+State 17
+
+    5 expr: expr '+' term .  [$end, TK_EOL, '+', '-', ')']
+    8 term: term . '*' factor
+
+    '*'  shift, and go to state 14
+
+    $default  reduce using rule 5 (expr)
+
+
+State 18
+
+    6 expr: expr '-' term .  [$end, TK_EOL, '+', '-', ')']
+    8 term: term . '*' factor
+
+    '*'  shift, and go to state 14
+
+    $default  reduce using rule 6 (expr)
+
+
+State 19
+
+    8 term: term '*' factor .
+
+    $default  reduce using rule 8 (term)
