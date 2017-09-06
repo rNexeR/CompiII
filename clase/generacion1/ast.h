@@ -40,6 +40,8 @@ class Expr
     Expr() {}
     virtual RetData *generate_code(stack<string> *_temps) = 0;
     ExprKind kind;
+    virtual bool is_immediate() = 0;
+    virtual int get_immediate() = 0;
 };
 
 class Ast
@@ -68,6 +70,7 @@ class Ast
         {
             Expr *t = *i;
             RetData *result = t->generate_code(_temps);
+            _temps->push(result->place);
             // printf("[%s] %s\n\n", result->place.c_str(), result->code.c_str());
             printf("%s\n", result->code.c_str());
             delete result;
@@ -104,6 +107,9 @@ class NumExpr : public Expr
         return ret;
     }
 
+    bool is_immediate() { return true; }
+    int get_immediate() { return this->value; }
+
     int value;
 };
 
@@ -116,6 +122,7 @@ class BinaryExpr : public Expr
         this->expr2 = expr2;
     }
     Expr *expr1, *expr2;
+    bool is_immediate() { return expr1->is_immediate() && expr2->is_immediate(); }
     // RetData *generate_code(stack<string>* _temps) { return NULL; }
 };
 
@@ -129,7 +136,7 @@ class AddExpr : public BinaryExpr
 
     RetData *generate_code(stack<string> *_temps)
     {
-        if (expr1->kind == expr2->kind && expr1->kind == NUMEXPR)
+        if (this->is_immediate())
         {
             RetData *ret = new RetData();
             string code = "";
@@ -137,7 +144,7 @@ class AddExpr : public BinaryExpr
             string place = _temps->top();
             _temps->pop();
             char val[25];
-            int result = ((NumExpr*)expr1)->value + ((NumExpr*)expr2)->value;
+            int result = get_immediate();
             sprintf(val, "%d", result);
             code = "li " + place + ", " + string(val) + "\n";
 
@@ -146,7 +153,6 @@ class AddExpr : public BinaryExpr
 
             return ret;
         }
-
         RetData *ret = new RetData(), *e1, *e2;
         string code = "";
 
@@ -171,6 +177,11 @@ class AddExpr : public BinaryExpr
 
         return ret;
     }
+
+    int get_immediate()
+    {
+        return expr1->get_immediate() + expr2->get_immediate();  
+    }
 };
 
 class SubExpr : public BinaryExpr
@@ -181,9 +192,14 @@ class SubExpr : public BinaryExpr
         this->kind = SUBEXPR;
     }
 
+    int get_immediate()
+    {
+        return expr1->get_immediate() - expr2->get_immediate();  
+    }
+
     RetData *generate_code(stack<string> *_temps)
     {
-        if (expr1->kind == expr2->kind && expr1->kind == NUMEXPR)
+        if (this->is_immediate())
         {
             RetData *ret = new RetData();
             string code = "";
@@ -191,7 +207,7 @@ class SubExpr : public BinaryExpr
             string place = _temps->top();
             _temps->pop();
             char val[25];
-            int result = ((NumExpr*)expr1)->value - ((NumExpr*)expr2)->value;
+            int result = this->get_immediate();
             sprintf(val, "%d", result);
             code = "li " + place + ", " + string(val) + "\n";
 
@@ -234,9 +250,14 @@ class MulExpr : public BinaryExpr
         this->kind = MULEXPR;
     }
 
+    int get_immediate()
+    {
+        return expr1->get_immediate() * expr2->get_immediate();  
+    }
+
     RetData *generate_code(stack<string> *_temps)
     {
-        if (expr1->kind == expr2->kind && expr1->kind == NUMEXPR)
+        if (this->is_immediate())
         {
             RetData *ret = new RetData();
             string code = "";
@@ -244,7 +265,7 @@ class MulExpr : public BinaryExpr
             string place = _temps->top();
             _temps->pop();
             char val[25];
-            int result = ((NumExpr*)expr1)->value * ((NumExpr*)expr2)->value;
+            int result = get_immediate();
             sprintf(val, "%d", result);
             code = "li " + place + ", " + string(val) + "\n";
 
@@ -303,6 +324,9 @@ class IdExpr : public Expr
 
         return ret;
     }
+
+    bool is_immediate() { return false; }
+    int get_immediate() { return -1; }
 
     string id;
 };
