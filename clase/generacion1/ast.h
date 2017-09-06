@@ -136,51 +136,63 @@ class AddExpr : public BinaryExpr
 
     RetData *generate_code(stack<string> *_temps)
     {
+        RetData *ret = new RetData();
+        string code = "";
+        string place;
         if (this->is_immediate())
         {
-            RetData *ret = new RetData();
-            string code = "";
-
-            string place = _temps->top();
+            place = _temps->top();
             _temps->pop();
             char val[25];
             int result = get_immediate();
             sprintf(val, "%d", result);
             code = "li " + place + ", " + string(val) + "\n";
-
-            ret->code = code;
-            ret->place = place;
-
-            return ret;
         }
-        RetData *ret = new RetData(), *e1, *e2;
-        string code = "";
+        else if (expr1->is_immediate() && expr2->kind == IDEXPR || expr2->is_immediate() && expr1->kind == IDEXPR)
+        {
+            Expr *imm = expr1->is_immediate() ? expr1 : expr2;
+            Expr *id = expr1->kind == IDEXPR ? expr1 : expr2;
 
-        e1 = this->expr1->generate_code(_temps);
-        e2 = this->expr2->generate_code(_temps);
+            int imm_val = imm->get_immediate();
+            RetData *id_ret = id->generate_code(_temps);
 
-        _temps->push(e2->place);
-        _temps->push(e1->place);
+            place = id_ret->place;
+            char val[25];
+            sprintf(val, "%d", imm_val);
 
-        string place = _temps->top();
-        _temps->pop();
+            code = id_ret->code;
+            code += "addi " + place + ", " + place + ", " + string(val) + "\n";
+        }
+        else
+        {
+            RetData *e1, *e2;
 
-        code = e1->code + e2->code;
+            e1 = this->expr1->generate_code(_temps);
+            e2 = this->expr2->generate_code(_temps);
 
-        code += "add " + place + ", " + e1->place + ", " + e2->place + " \n";
+            _temps->push(e2->place);
+            _temps->push(e1->place);
 
-        ret->place = place;
+            place = _temps->top();
+            _temps->pop();
+
+            code = e1->code + e2->code;
+
+            code += "add " + place + ", " + e1->place + ", " + e2->place + " \n";
+
+            delete e1;
+            delete e2;
+        }
+
         ret->code = code;
-
-        delete e1;
-        delete e2;
+        ret->place = place;
 
         return ret;
     }
 
     int get_immediate()
     {
-        return expr1->get_immediate() + expr2->get_immediate();  
+        return expr1->get_immediate() + expr2->get_immediate();
     }
 };
 
@@ -194,49 +206,60 @@ class SubExpr : public BinaryExpr
 
     int get_immediate()
     {
-        return expr1->get_immediate() - expr2->get_immediate();  
+        return expr1->get_immediate() - expr2->get_immediate();
     }
 
     RetData *generate_code(stack<string> *_temps)
     {
+        RetData *ret = new RetData();
+        string code = "";
+        string place;
         if (this->is_immediate())
         {
-            RetData *ret = new RetData();
-            string code = "";
-
-            string place = _temps->top();
+            place = _temps->top();
             _temps->pop();
             char val[25];
             int result = this->get_immediate();
             sprintf(val, "%d", result);
             code = "li " + place + ", " + string(val) + "\n";
-
-            ret->code = code;
-            ret->place = place;
-
-            return ret;
         }
-        RetData *ret = new RetData(), *e1, *e2;
-        string code = "";
+        else if (expr2->is_immediate() && expr1->kind == IDEXPR)
+        {
+            Expr *imm = expr2;
+            Expr *id =  expr1;
 
-        e1 = this->expr1->generate_code(_temps);
-        e2 = this->expr2->generate_code(_temps);
+            int imm_val = imm->get_immediate();
+            RetData *id_ret = id->generate_code(_temps);
 
-        _temps->push(e2->place);
-        _temps->push(e1->place);
+            place = id_ret->place;
+            char val[25];
+            sprintf(val, "-%d", imm_val);
 
-        string place = _temps->top();
-        _temps->pop();
+            code = id_ret->code;
+            code += "addi " + place + ", " + place + ", " + string(val) + "\n";
+        }
+        else
+        {
+            RetData *e1, *e2;
+            e1 = this->expr1->generate_code(_temps);
+            e2 = this->expr2->generate_code(_temps);
 
-        code = e1->code + e2->code;
+            _temps->push(e2->place);
+            _temps->push(e1->place);
 
-        code += "sub " + place + ", " + e1->place + ", " + e2->place + " \n";
+            place = _temps->top();
+            _temps->pop();
+
+            code = e1->code + e2->code;
+
+            code += "sub " + place + ", " + e1->place + ", " + e2->place + " \n";
+
+            delete e1;
+            delete e2;
+        }
 
         ret->place = place;
         ret->code = code;
-
-        delete e1;
-        delete e2;
 
         return ret;
     }
@@ -252,7 +275,7 @@ class MulExpr : public BinaryExpr
 
     int get_immediate()
     {
-        return expr1->get_immediate() * expr2->get_immediate();  
+        return expr1->get_immediate() * expr2->get_immediate();
     }
 
     RetData *generate_code(stack<string> *_temps)
