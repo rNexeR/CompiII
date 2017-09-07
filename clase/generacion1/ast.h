@@ -148,10 +148,10 @@ class AddExpr : public BinaryExpr
             sprintf(val, "%d", result);
             code = "li " + place + ", " + string(val) + "\n";
         }
-        else if (expr1->is_immediate() && expr2->kind == IDEXPR || expr2->is_immediate() && expr1->kind == IDEXPR)
+        else if ((expr1->is_immediate()) || (expr2->is_immediate()))
         {
             Expr *imm = expr1->is_immediate() ? expr1 : expr2;
-            Expr *id = expr1->kind == IDEXPR ? expr1 : expr2;
+            Expr *id = expr1->is_immediate() ? expr2 : expr1;
 
             int imm_val = imm->get_immediate();
             RetData *id_ret = id->generate_code(_temps);
